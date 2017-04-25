@@ -4,8 +4,6 @@
  * @author: lizijie
  * @update: 
  */
-
-const logModel = require('./log_model');
 const reportConfig = require('../config/report_config');
 const sendMail = require('./send_mail');
 const findLog = require('./find_log');
@@ -79,7 +77,7 @@ function countLog(reportType){
     let dateList = dateCache[reportType];
     // 缓存中项目的最后一个日期
     let lastDate = dateList[dateList.length - 1];
-    // 获取从最后一个日期往前，设置的检查时间内的缓存日期。
+    // 获取从最后一个日期往前，到设置的检查时间内的缓存日期。
     let filterDate = dateList.filter((date)=>{
         return +date >= +lastDate - +checktime;
     });

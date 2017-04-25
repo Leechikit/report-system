@@ -9,7 +9,6 @@ const sendMail = require('./send_mail');
 const reportConfig = require('../config/report_config');
 const hostConfig = require('../config/host_config');
 const mailFormat = require('./mail_format');
-const LogModel = require('./log_model');
 const findLog = require('../utils/find_log');
 // 轮询间隔
 const DURATION = 60000;
@@ -30,7 +29,7 @@ function getNowDate(date) {
     	day: nowDate.getDate(),
         hour: nowDate.getHours(),
         minute: nowDate.getMinutes(),
-        nowDate: nowDate
+        time: nowDate.getTime()
     }
 }
 
@@ -46,7 +45,12 @@ function getLastDate(date) {
     lastDate.setSeconds(0);
     lastDate.setMilliseconds(0);
     return {
-        lastDate: lastDate
+    	year: lastDate.getFullYear(),
+    	month: lastDate.getMonth() + 1,
+    	day: lastDate.getDate(),
+        hour: lastDate.getHours(),
+        minute: lastDate.getMinutes(),
+        time: lastDate.getTime()
     }
 }
 
@@ -85,12 +89,12 @@ function getTheme(reportType, minDate, maxDate) {
  * @param: {Date} maxDate 最大日期
  */
  async function reportLogMes(reportType,minDate,maxDate) {
-    let mes = await findLog({ 'reportType': reportType, 'time': { '$gt': minDate.getTime(), '$lte': maxDate.getTime() } });    
+ 	// 获取数据
+    let mes = await findLog({ 'reportType': reportType, 'time': { '$gt': minDate.time, '$lte': maxDate.time } });    
+    // 邮件标题
     let theme = getTheme(reportType,minDate,maxDate);
+    // 配置的邮件
     let {mails} = reportConfig[reportType];
-    console.log(mes);
-    console.log(theme);
-    console.log(mails);
     // 数据库中有数据则发送
     mes && mails.forEach((item) => {
         sendMail(item,theme,mailFormat(mes));
@@ -100,8 +104,10 @@ function getTheme(reportType, minDate, maxDate) {
 /**
  * 循环所有项目
  *
+ * @param: {Date} minDate 最小日期
+ * @param: {Date} maxDate 最大日期
  */
-function loopReportConfig(dateMin, dateMax) {
+function loopReportConfig(minDate, maxDate) {
     for (let reportType in reportConfig) {
         let {
             watch,
@@ -109,7 +115,7 @@ function loopReportConfig(dateMin, dateMax) {
         } = reportConfig[reportType];
         // 若开启监听并有设置邮箱则发送邮件
         if (watch == true && mails && mails.length > 0) {
-            reportLogMes(reportType,dateMin,dateMax);
+            reportLogMes(reportType,minDate,maxDate);
         }
     }
 }
@@ -123,11 +129,11 @@ function loopDate() {
     let {configHour, configMinute} = getConfigDate();
     let interval = setInterval(() => {
     	// 获取当前小时,分钟和日期
-        let {hour, minute, nowDate} = getNowDate();
+        let nowDate = getNowDate();
         // 当设置时分与当前时分一样，则循环项目发送邮件
-        if (configHour == hour && configMinute == minute) {
+        if (configHour == nowDate.hour && configMinute == nowDate.minute) {
             // 获取上一天日期
-            let {lastDate} = getLastDate()
+            let lastDate = getLastDate()
             // 循环所有项目
             loopReportConfig(lastDate, nowDate);
         }

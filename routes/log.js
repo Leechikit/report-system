@@ -1,9 +1,11 @@
 const router = require('koa-router')();
-const report = require('../utils/report.js');
+const logFormat = require('../utils/log_format');
+const saveLog = require('../utils/save_log');
 
 router.get('/w', async (ctx, next)=>{
     ctx.body = 'success';
-    await report();
+    let logObj = logFormat(ctx);
+    await saveLog(logObj);
 });
 
 module.exports = router;

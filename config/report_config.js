@@ -5,7 +5,7 @@ module.exports = {
         checktime: 3600000,
         reportDay: 1,
         reportLimit: 3,
-        emails: [
+        mails: [
             'lizijie@yy.com',
             // '308695699@qq.com',
             '2772217928@qq.com'
@@ -17,7 +17,7 @@ module.exports = {
         checktime: 60000,
         reportDay: 1,
         reportLimit: 3,
-        emails: [
+        mails: [
             '2772217928@qq.com',
             '279148001@qq.com'
         ]

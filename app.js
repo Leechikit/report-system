@@ -13,6 +13,10 @@ const index = require('./routes/index');
 const users = require('./routes/users');
 const log = require('./routes/log');
 
+// 定期上报
+const regularReport = require('./utils/regular_report');
+regularReport();
+
 // middlewares
 app.use(convert(bodyparser));
 app.use(convert(json()));
